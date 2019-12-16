@@ -1,6 +1,6 @@
 # NSBPeAPIClientDELPHI
 
-Esta página apresenta trechos de códigos de um módulo em VB6 que foi desenvolvido para consumir as funcionalidades da NS BP-e API.
+Esta página apresenta trechos de códigos de um módulo em DELPHI 10 que foi desenvolvido para consumir as funcionalidades da NS BP-e API.
 
 -------
 
