@@ -1,1 +1,136 @@
 # NSBPeAPIClientDELPHI
+
+Esta página apresenta trechos de códigos de um módulo em VB6 que foi desenvolvido para consumir as funcionalidades da NS BP-e API.
+
+-------
+
+## Primeiros passos:
+
+### Integrando ao sistema:
+
+Para utilizar as funções de comunicação com a API, você precisa realizar os seguintes passos:
+
+1. Extraia o conteúdo da pasta compactada que você baixou;
+2. Copie para a pasta da sua aplicação a classe **BPeAPI.pas**, que esta na pasta raiz;
+3. Abra o seu projeto e importe a pasta copiada.
+4. A aplicação utiliza as bibliotecas **Indy 10** e **System.JSON** para realizar a comunicação com a API e fazer a manipulação de dados JSON, respectivamente. As referências já estão referenciadas na classe.
+
+**OBS.:** Caso ocorra erro ao compilar o projeto(Could Not Load SSL Library), pode significar que o mesmo não possua, em sua pasta Debug, duas dlls essenciais para a execução do código. Veja mais informações de como resolver o problema em um post do blog: [Erro de SSL](https://nstecnologia.com.br/blog/could-not-load-ssl-library/)
+
+**Pronto!** Agora, você já pode consumir a NS BP-e API através do seu sistema. Todas as funcionalidades de comunicação foram implementadas na classe BPeAPI.pas. Confira abaixo sobre realizar uma emissão completa
+
+------
+
+## Emissão Sincrona:
+
+### Realizando uma Emissão:
+
+Para realizar uma emissão completa, você poderá utilizar a função emitirBPeSincrono do módulo BPeAPI. Veja abaixo sobre os parâmetros necessários, e um exemplo de chamada do método.
+
+##### Parâmetros:
+
+**ATENÇÃO:** o **token** também é um parâmetro necessário e você deve primeiramente defini-lo no módulo BPeAPI.pas. Ele é uma constante do módulo. 
+
+Parametros     | Descrição
+:-------------:|:-----------
+conteudo       | Conteúdo de emissão do documento.
+tpConteudo     | Tipo de conteúdo que está sendo enviado. Valores possíveis: json, xml, txt
+CNPJ           | CNPJ do emitente do documento.
+tpDown         | Tipo de arquivos a serem baixados.Valores possíveis: <ul> <li>**X** - XML</li> <li>**J** - JSON</li> <li>**P** - PDF</li> <li>**XP** - XML e PDF</li> <li>**JP** - JSON e PDF</li> </ul> 
+tpAmb          | Ambiente onde foi autorizado o documento.Valores possíveis:<ul> <li>1 - produção</li> <li>2 - homologação</li> </ul>
+caminho        | Caminho onde devem ser salvos os documentos baixados.
+exibeNaTela    | Se for baixado, exibir o PDF na tela após a autorização.Valores possíveis: <ul> <li>**True** - será exibido</li> <li>**False** - não será exibido</li> </ul> 
+
+##### Exemplo de chamada:
+
+Após ter todos os parâmetros listados acima, você deverá fazer a chamada da função. Veja o código de exemplo abaixo:
+           
+    retorno := emitirBPeSincrono(conteudo, tpConteudo, CNPJEmit, tpDown, tpAmb, caminho, exibirNaTela);
+    ShowMessage(retorno);
+
+A função **emitirBPeSincrono** fará o envio, a consulta e download do documento, utilizando as funções emitirBPe, consultarStatusProcessamento e downloadBPeESalvar, presentes no módulo BPeAPI.pas. Por isso, o retorno será um JSON com os principais campos retornados pelos métodos citados anteriormente. No exemplo abaixo, veja como tratar o retorno da função emitirBPeSincrono:
+
+##### Exemplo de tratamento de retorno:
+
+O JSON retornado pelo método terá os seguintes campos: statusEnvio, statusConsulta, statusDownload, cStat, chBPe, nProt, motivo, nsNRec, erros. Veja o exemplo abaixo:
+
+    {
+        "statusEnvio": "200",
+        "statusConsulta": "200",
+        "statusDownload": "200",
+        "cStat": "100",
+        "chBPe": "43181007364617000135550000000119741004621864",
+        "nProt": "143180007036833",
+        "motivo": "Autorizado o uso da BP-e",
+        "nsNRec": "313022",
+        "erros": ""
+    }
+
+Confira um código para tratamento do retorno, no qual pegará as informações dispostas no JSON de Retorno disponibilizado:
+
+	retorno := emitirBPeSincrono(conteudoEnviar, 'json', '11111111111111', 'XP', '2', 'C:\Documentos', True);
+ 
+    jsonRetorno := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(retorno), 0) as TJSONObject;
+	statusEnvio := jsonRetorno.GetValue('statusEnvio').Value;
+	statusConsulta := jsonRetorno.GetValue('statusConsulta').Value;
+    statusDownload := jsonRetorno.GetValue('statusDownload').Value;
+    cStat := jsonRetorno.GetValue('cStat').Value;
+    chBPe := jsonRetorno.GetValue('chBPe').Value;
+    nProt := jsonRetorno.GetValue('nProt').Value;
+    motivo := jsonRetorno.GetValue('motivo').Value;
+	nsNRec := jsonRetorno.GetValue('nsNRec').Value;
+    erros := jsonRetorno.GetValue('erros').Value;
+    // Testa se houve sucesso na emissão
+    if ((statusEnvio = '200') Or (statusEnvio = '-6')) then
+    begin
+		if(statusConsulta = '200')	
+		begin
+      		if (cStat = '100') then
+      		begin
+        		ShowMessage(motivo);
+        		if (statusDownload <> '200') then
+        		begin
+          			// Aqui você pode realizar um tratamento em caso de erro no download
+        		end
+      		end
+      		else
+      		begin
+        		ShowMessage(motivo);
+      		end
+		end
+		else
+		begin
+			ShowMessage(motivo + #13 + erros);
+		end
+    end
+    else
+    begin
+      ShowMessage(motivo + #13 + erros);
+    end;
+
+-----
+
+## Demais Funcionalidades:
+
+No módulo BPeAPI, você pode encontrar também as seguintes funcionalidades:
+
+NOME                     | FINALIDADE             | DOCUMENTAÇÂO CONFLUENCE
+:-----------------------:|:----------------------:|:-----------------------
+**enviaConteudoParaAPI** |Função genérica que envia um conteúdo para API. Requisições do tipo POST.|
+**emitirBPe** | Envia um BP-e para processamento.|[Emitir BP-e](https://confluence.ns.eti.br/pages/viewpage.action?pageId=20613334#Emiss%C3%A3onaNSBP-eAPI-Emiss%C3%A3odeBP-e).
+**consultarStatusProcessamento** | Consulta o status de processamento de um BP-e.| [Status de Processamento do BP-e](https://confluence.ns.eti.br/pages/viewpage.action?pageId=20613334#Emiss%C3%A3onaNSBP-eAPI-StatusdeProcessamentodoBP-e).
+**downloadBPe** | Baixa documentos de emissão de um BP-e autorizado. | [Download do BP-e](https://confluence.ns.eti.br/pages/viewpage.action?pageId=20613334#Emiss%C3%A3onaNSBP-eAPI-DownloaddoBP-e)
+**downloadBPeESalvar** | Baixa documentos de emissão de um BP-e autorizado e salva-os em um diretório. | Por utilizar o método downloadBPe, a documentação é a mesma. 
+**downloadEventoBPe** | Baixa documentos de evento de um BP-e autorizado | [Download de Evento de BP-e](https://confluence.ns.eti.br/display/PUB/Download+de+Eventos+na+NS+BP-e+API).
+**downloadEventoNFeESalvar** | Baixa documentos de evento de uma NF-e autorizada e salva-os em um diretório. | Por utilizar o método downloadEventoBPe, a documentação é a mesma.
+**cancelarBPe** | Realiza o cancelamento de um BP-e. | [Cancelamento de BP-e](https://confluence.ns.eti.br/display/PUB/Cancelamento+na+NS+BP-e+API).
+**naoEmbarqueBPe** | Realiza o evento de não embarque de um BP-e. | [Evento de Não Embarque](https://confluence.ns.eti.br/pages/viewpage.action?pageId=20613761).
+**consultarSituacao** | Consulta a situação de um BP-e na Sefaz. | [Consulta Situação de BP-e](https://confluence.ns.eti.br/pages/viewpage.action?pageId=20613631).
+**salvarXML** | Salva um XML em um diretório. | 
+**salvarJSON** | Salva um JSON em um diretório. |
+**salvarPDF** |	Salva um PDF em um diretório. | 
+**gravaLinhaLog** | Grava uma linha de texto no arquivo de log. | 
+
+
+
+![Ns](https://nstecnologia.com.br/blog/wp-content/uploads/2018/11/ns%C2%B4tecnologia.png) | Obrigado pela atenção!
