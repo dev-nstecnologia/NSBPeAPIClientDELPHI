@@ -27,6 +27,7 @@ function cancelarBPe(chBPe, tpAmb, dhEvento, nProt, xJust, tpDown,
 function naoEmbarqueBPe(chBPe, tpAmb, dhEvento, nProt, xJust, tpDown,
  caminho: String; exibeNaTela: boolean = false): String;
 function consultarSituacao(licencaCNPJ, chBPe, tpAmb:String): String;
+function alterarPoltrona(chBPe, tpAmb, dhEvento, nProt, poltrona:String): String;
 function salvarXML(xml, caminho, chBPe: String; tpEvento: String = ''; nSeqEvento: String = ''): String;
 function salvarJSON(json, caminho, chBPe: String; tpEvento: String = ''; nSeqEvento: String = ''): String;
 function salvarPDF(pdf, caminho, chBPe: String; tpEvento: String = ''; nSeqEvento: String = ''): String;
@@ -40,7 +41,7 @@ uses
 var
   token: String = 'SEU_TOKEN';
 
-  // Função genérica de envio para um url, contendo o token no header
+// Função genérica de envio para um url, contendo o token no header
 function enviaConteudoParaAPI(conteudoEnviar, url, tpConteudo: String): String;
 var
   retorno: String;
@@ -571,6 +572,7 @@ begin
   Result := resposta;
 end;
 
+// Consulta a situação de um contribuinte
 function consultarSituacao(licencaCNPJ, chBPe, tpAmb:String): String;
 var
   json: String;
@@ -599,30 +601,47 @@ begin
 end;
 
 
+function alterarPoltrona(chBPe, tpAmb, dhEvento, nProt, poltrona:String): String;
+var
+  json: String;
+  url, resposta, respostaDownload: String;
+  status: String;
+  jsonRetorno: TJSONObject;
+begin
+  json := '{' +
+              '"chBPe": "'        + chBPe        + '",' +
+              '"tpAmb": "'        + tpAmb        + '",' +
+              '"dhEvento": "'     + dhEvento     + '",' +
+              '"nProt": "'        + nProt        + '",' +
+              '"poltrona": "'     + poltrona     + '"' +
+          '}';
+
+  url := 'https://bpe.ns.eti.br/v1/bpe/alterpol';
+
+  gravaLinhaLog ('[ALTERACAO_POLTRONA_DADOS]');
+  gravaLinhaLog (json);
+
+  resposta := enviaConteudoParaAPI(json, url, 'json');
+
+  gravaLinhaLog('[ALTERACAO_POLTRONA_RESPOSTA]');
+  gravaLinhaLog(resposta);
+
+  Result := resposta;
+end;
+
 // Função para salvar o XML de retorno
 function salvarXML(xml, caminho, chBPe: String; tpEvento: String = ''; nSeqEvento: String = ''): String;
 var
   arquivo: TextFile;
   conteudoSalvar, localParaSalvar: String;
 begin
-  // Seta o caminho para o arquivo XML
   localParaSalvar := caminho + tpEvento + chBPe + nSeqEvento + '-procBPe.xml';
-
-  // Associa o arquivo ao caminho
   AssignFile(arquivo, localParaSalvar);
-  // Abre para escrita o arquivo
   Rewrite(arquivo);
-
-  // Copia o retorno
   conteudoSalvar := xml;
-  // Ajeita o XML retirando as barras antes das aspas duplas
   conteudoSalvar := StringReplace(conteudoSalvar, '\"', '"',
     [rfReplaceAll, rfIgnoreCase]);
-
-  // Escreve o retorno no arquivo
   Writeln(arquivo, conteudoSalvar);
-
-  // Fecha o arquivo
   CloseFile(arquivo);
 end;
 
@@ -632,21 +651,11 @@ var
   arquivo: TextFile;
   conteudoSalvar, localParaSalvar: String;
 begin
-  // Seta o caminho para o arquivo JSON
   localParaSalvar := caminho + tpEvento + chBPe + nSeqEvento + '-procBPe.json';
-
-  // Associa o arquivo ao caminho
   AssignFile(arquivo, localParaSalvar);
-  // Abre para escrita o arquivo
   Rewrite(arquivo);
-
-  // Copia o retorno
   conteudoSalvar := json;
-
-  // Escreve o retorno no arquivo
   Writeln(arquivo, conteudoSalvar);
-
-  // Fecha o arquivo
   CloseFile(arquivo);
 end;
 
@@ -657,14 +666,10 @@ var
   base64decodificado: TStringStream;
   arquivo: TFileStream;
 begin
-  /// /Seta o caminho para o arquivo PDF
-  localParaSalvar := caminho + tpEvento + chBPe + nSeqEvento + '-procBPe.pdf';
 
-  // Copia e cria uma TString com o base64
+  localParaSalvar := caminho + tpEvento + chBPe + nSeqEvento + '-procBPe.pdf';
   conteudoSalvar := pdf;
   base64decodificado := TStringStream.Create(conteudoSalvar);
-
-  // Cria o arquivo .pdf e decodifica o base64 para o arquivo
   try
     arquivo := TFileStream.Create(localParaSalvar, fmCreate);
     try
@@ -683,19 +688,12 @@ var
   caminhoEXE, nomeArquivo, data: String;
   log: TextFile;
 begin
-  // Pega o caminho do executável
+
   caminhoEXE := ExtractFilePath(GetCurrentDir);
   caminhoEXE := caminhoEXE + 'log\';
-
-  // Pega a data atual
   data := DateToStr(Date);
-
-  // Ajeita o XML retirando as barras antes das aspas duplas
   data := StringReplace(data, '/', '', [rfReplaceAll, rfIgnoreCase]);
-
   nomeArquivo := caminhoEXE + data;
-
-  // Se diretório \log não existe, é criado
   if not DirectoryExists(caminhoEXE) then
     CreateDir(caminhoEXE);
 
