@@ -600,7 +600,7 @@ begin
   Result := resposta;
 end;
 
-
+// Altera a poltrona no BP-e
 function alterarPoltrona(chBPe, tpAmb, dhEvento, nProt, poltrona:String): String;
 var
   json: String;

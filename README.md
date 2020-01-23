@@ -15,7 +15,7 @@ Para utilizar as funções de comunicação com a API, você precisa realizar os
 3. Abra o seu projeto e importe a pasta copiada.
 4. A aplicação utiliza as bibliotecas **Indy 10** e **System.JSON** para realizar a comunicação com a API e fazer a manipulação de dados JSON, respectivamente. As referências já estão referenciadas na classe.
 
-**OBS.:** Caso ocorra erro ao compilar o projeto(Could Not Load SSL Library), pode significar que o mesmo não possua, em sua pasta Debug, duas dlls essenciais para a execução do código. Veja mais informações de como resolver o problema em um post do blog: [Erro de SSL](https://nstecnologia.com.br/blog/could-not-load-ssl-library/)
+**OBS.:** Caso ocorra erro ao compilar o projeto (Could Not Load SSL Library), pode significar que o mesmo não possua, em sua pasta Debug, duas dlls essenciais para a execução do código. Veja mais informações de como resolver o problema em um post do blog: [Erro de SSL](https://nstecnologia.com.br/blog/could-not-load-ssl-library/)
 
 **Pronto!** Agora, você já pode consumir a NS BP-e API através do seu sistema. Todas as funcionalidades de comunicação foram implementadas na classe BPeAPI.pas. Confira abaixo sobre realizar uma emissão completa
 
@@ -25,11 +25,11 @@ Para utilizar as funções de comunicação com a API, você precisa realizar os
 
 ### Realizando uma Emissão:
 
-Para realizar uma emissão completa, você poderá utilizar a função emitirBPeSincrono do módulo BPeAPI. Veja abaixo sobre os parâmetros necessários, e um exemplo de chamada do método.
+Para realizar uma emissão completa, você poderá utilizar a função **emitirBPeSincrono** do módulo BPeAPI. Veja abaixo sobre os parâmetros necessários, e um exemplo de chamada do método.
 
 ##### Parâmetros:
 
-**ATENÇÃO:** o **token** também é um parâmetro necessário e você deve primeiramente defini-lo no módulo BPeAPI.pas. Ele é uma constante do módulo. 
+**ATENÇÃO:** o **token** também é um parâmetro necessário e você deve primeiramente defini-lo no módulo **BPeAPI.pas**. Ele é uma constante do módulo. 
 
 Parametros     | Descrição
 :-------------:|:-----------
@@ -37,7 +37,7 @@ conteudo       | Conteúdo de emissão do documento.
 tpConteudo     | Tipo de conteúdo que está sendo enviado. Valores possíveis: json, xml, txt
 CNPJ           | CNPJ do emitente do documento.
 tpDown         | Tipo de arquivos a serem baixados.Valores possíveis: <ul> <li>**X** - XML</li> <li>**J** - JSON</li> <li>**P** - PDF</li> <li>**XP** - XML e PDF</li> <li>**JP** - JSON e PDF</li> </ul> 
-tpAmb          | Ambiente onde foi autorizado o documento.Valores possíveis:<ul> <li>1 - produção</li> <li>2 - homologação</li> </ul>
+tpAmb          | Ambiente onde foi autorizado o documento.Valores possíveis:<ul> <li>**1** - produção</li> <li>**2** - homologação</li> </ul>
 caminho        | Caminho onde devem ser salvos os documentos baixados.
 exibeNaTela    | Se for baixado, exibir o PDF na tela após a autorização.Valores possíveis: <ul> <li>**True** - será exibido</li> <li>**False** - não será exibido</li> </ul> 
 
@@ -48,7 +48,7 @@ Após ter todos os parâmetros listados acima, você deverá fazer a chamada da 
     retorno := emitirBPeSincrono(conteudo, tpConteudo, CNPJEmit, tpDown, tpAmb, caminho, exibirNaTela);
     ShowMessage(retorno);
 
-A função **emitirBPeSincrono** fará o envio, a consulta e download do documento, utilizando as funções emitirBPe, consultarStatusProcessamento e downloadBPeESalvar, presentes no módulo BPeAPI.pas. Por isso, o retorno será um JSON com os principais campos retornados pelos métodos citados anteriormente. No exemplo abaixo, veja como tratar o retorno da função emitirBPeSincrono:
+A função **emitirBPeSincrono** fará o envio, a consulta e download do documento, utilizando as funções **emitirBPe**, **consultarStatusProcessamento** e **downloadBPeESalvar**, presentes no módulo **BPeAPI.pas**. Por isso, o retorno será um JSON com os principais campos retornados pelos métodos citados anteriormente. No exemplo abaixo, veja como tratar o retorno da função emitirBPeSincrono:
 
 ##### Exemplo de tratamento de retorno:
 
@@ -126,6 +126,7 @@ NOME                     | FINALIDADE             | DOCUMENTAÇÂO CONFLUENCE
 **cancelarBPe** | Realiza o cancelamento de um BP-e. | [Cancelamento de BP-e](https://confluence.ns.eti.br/display/PUB/Cancelamento+na+NS+BP-e+API).
 **naoEmbarqueBPe** | Realiza o evento de não embarque de um BP-e. | [Evento de Não Embarque](https://confluence.ns.eti.br/pages/viewpage.action?pageId=20613761).
 **consultarSituacao** | Consulta a situação de um BP-e na Sefaz. | [Consulta Situação de BP-e](https://confluence.ns.eti.br/pages/viewpage.action?pageId=20613631).
+**alteracaoPoltrona** | Realiza a troca de assento do BP-e. | [Alteração de Poltrona](https://confluence.ns.eti.br/pages/viewpage.action?pageId=28411393).
 **salvarXML** | Salva um XML em um diretório. | 
 **salvarJSON** | Salva um JSON em um diretório. |
 **salvarPDF** |	Salva um PDF em um diretório. | 
@@ -133,4 +134,4 @@ NOME                     | FINALIDADE             | DOCUMENTAÇÂO CONFLUENCE
 
 
 
-![Ns](https://nstecnologia.com.br/blog/wp-content/uploads/2018/11/ns%C2%B4tecnologia.png) | Obrigado pela atenção!
+![Ns](https://nstecnologia.com.br/blog/wp-content/uploads/2018/11/ns%C2%B4tecnologia.png) 
